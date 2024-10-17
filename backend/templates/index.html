@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Container Monitor</title>
+    <style>
+        /* Add some basic styling */
+    </style>
+</head>
+<body>
+    <h1>Docker Container Monitor</h1>
+    <form action="/update" method="post">
+        {% for machine in machines %}
+        <h2>{{ machine.name }} ({{ machine.address }})</h2>
+        <ul>
+            {% for container in machine.containers %}
+            <li>
+                {{ container.name }}
+                {% if container.outdated %}
+                <span style="color: red;">(Outdated)</span>
+                <input type="checkbox" name="update" value="{{ machine.name }}:{{ container.name }}">
+                <button type="submit" name="update_single" value="{{ machine.name }}:{{ container.name }}">Update</button>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+        <button type="submit">Update Selected Containers</button>
+    </form>
+</body>
+</html>
