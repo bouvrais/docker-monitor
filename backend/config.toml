@@ -1,11 +1,11 @@
 [[machines]]
 name = "Server 1"
-address = "192.168.1.100"
+address = "127.0.0.1:7001"
 
 [[machines]]
 name = "Server 2"
-address = "192.168.1.101"
+address = "127.0.0.1:7001"
 
 [[machines]]
 name = "Server 3"
-address = "192.168.1.102"
+address = "127.0.0.1:7001"

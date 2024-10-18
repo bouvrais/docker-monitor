@@ -71,7 +71,7 @@ async fn check_image_update(docker: &Docker, image: &str) -> bool {
     }
 }
 
-#[get("/containers")]
+#[get("/api/containers")]
 async fn get_containers(state: web::Data<AppState>) -> impl Responder {
     let containers = state.containers.read().await;
     HttpResponse::Ok().json(&*containers)
