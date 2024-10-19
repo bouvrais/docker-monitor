@@ -7,7 +7,7 @@ use config::Config;
 use actix_files as fs;
 use serde_json::json;
 use reqwest::Client;
-
+use actix_cors::Cors;
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Container {
     name: String,
@@ -44,11 +44,16 @@ async fn main() -> std::io::Result<()> {
     let machines: Vec<RemoteMachine> = config.get("machines").unwrap();
 
     let app_state = web::Data::new(Arc::new(Mutex::new(AppState { machines })));
-    HttpServer::new(move || App::new()
-    .app_data(app_state.clone())
-    .service(hello)
-    .service(get_machines)
-    .service(fs::Files::new("/", "../frontend/public").index_file("index.html")))
+    HttpServer::new(move || {
+        //let cors = Cors::default().allowed_origin("http://localhost:5174");
+        let cors = Cors::default().allow_any_origin().send_wildcard();
+        App::new()
+        .wrap(cors)
+        .app_data(app_state.clone())
+        .service(hello)
+        .service(get_machines)
+        .service(fs::Files::new("/", "../web/dist").index_file("index.html"))
+    })
     .bind(("localhost", 6780))?
     .run()
     .await
