@@ -1,11 +1,7 @@
 [[machines]]
-name = "Server 1"
+name = "Neptune"
 address = "127.0.0.1:7001"
 
 [[machines]]
-name = "Server 2"
-address = "127.0.0.1:7001"
-
-[[machines]]
-name = "Server 3"
+name = "Neptune Duplicate"
 address = "127.0.0.1:7001"

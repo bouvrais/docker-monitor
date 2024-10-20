@@ -1,8 +1,20 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import Machine from './machine.svelte';
 
-	let machines = [];
+	type ContainerSummary = {
+		name: string;
+		image: string;
+		status: string;
+	};
+
+	type MachineSummary = {
+		name: string;
+		address: string;
+		containers: ContainerSummary[];
+	};
+
+	let machines: MachineSummary[] = [];
 
 	onMount(async () => {
 		console.log('Mounting App and fetching machines');

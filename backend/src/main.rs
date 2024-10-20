@@ -1,4 +1,3 @@
-//use actix_web::{web, App, HttpServer, HttpResponse, Responder};
 use actix_web::{web, get, App, HttpResponse, HttpServer, Responder};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -7,7 +6,6 @@ use config::Config;
 use actix_files as fs;
 use serde_json::json;
 use reqwest::Client;
-use actix_cors::Cors;
 use chrono::{DateTime, Utc};
 use bollard::models::Port;
 
@@ -51,10 +49,7 @@ async fn main() -> std::io::Result<()> {
 
     let app_state = web::Data::new(Arc::new(Mutex::new(AppState { machines })));
     HttpServer::new(move || {
-        //let cors = Cors::default().allowed_origin("http://localhost:5174");
-        let cors = Cors::default().allow_any_origin().send_wildcard();
         App::new()
-        .wrap(cors)
         .app_data(app_state.clone())
         .service(hello)
         .service(get_machines)
@@ -113,7 +108,6 @@ async fn get_machine_containers(path: web::Path<String>, state: web::Data<Arc<Mu
         match client.get(&url).send().await {
             Ok(response) => {
                 if let Ok(containers) = response.json::<Vec<Container>>().await {
-                    println!("Containers: {:?}", containers);
                     HttpResponse::Ok().json(json!({ "containers": containers }))
                 } else {
                     println!("Failed to parse containers for machine: {}", machine.name);

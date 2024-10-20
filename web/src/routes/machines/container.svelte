@@ -1,13 +1,18 @@
 <script lang="ts">
-  // export let container: {
-  //   id: string;
-  //   name: string;
-  //   image: string;
-  //   status: string;
-  //   created: string;
-  //   ports: string[];
-  // };
-  export let container;
+  class Port {
+    IP?: string;
+    PublicPort?: number;
+    PrivatePort?: number;
+    Type?: string;
+  }
+  export let container: {
+    id: string;
+    name: string;
+    image: string;
+    status: string;
+    created: Date;
+    ports: Port[];
+  };
 </script>
 
 <div class="container-details">
