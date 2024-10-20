@@ -1,5 +1,6 @@
 use actix_web::{web, App, HttpServer, HttpResponse, Responder, get};
 use bollard::Docker;
+use bollard::models::Port;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -13,6 +14,7 @@ struct Container {
     image: String,
     status: String,
     created: DateTime<Utc>,
+    ports: Vec<Port>,
     update_available: bool,
 }
 
@@ -30,6 +32,7 @@ async fn update_containers(state: web::Data<AppState>, docker: &Docker) {
         let image = container.image.unwrap_or_default();
         let status = container.state.unwrap_or_default();
         let created = DateTime::from_timestamp(container.created.unwrap_or_default(), 0).unwrap_or_default();
+        let ports = container.ports.unwrap_or_default();
 
         // Check if an update is available for the image
         let update_available = check_image_update(&docker, &image).await;
@@ -40,6 +43,7 @@ async fn update_containers(state: web::Data<AppState>, docker: &Docker) {
             image,
             status,
             created,
+            ports,
             update_available,
         });
     }
@@ -94,9 +98,6 @@ async fn main() -> std::io::Result<()> {
             update_containers(state_clone.clone(), &docker_clone).await;
         }
     });
-
-    // Initial update
-    update_containers(state.clone(), &docker).await;
 
     HttpServer::new(move || {
         App::new()

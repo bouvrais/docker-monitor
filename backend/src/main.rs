@@ -8,11 +8,17 @@ use actix_files as fs;
 use serde_json::json;
 use reqwest::Client;
 use actix_cors::Cors;
+use chrono::{DateTime, Utc};
+use bollard::models::Port;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 struct Container {
+    id: String,
     name: String,
     image: String,
     status: String,
+    created: DateTime<Utc>,
+    ports: Vec<Port>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -52,7 +58,10 @@ async fn main() -> std::io::Result<()> {
         .app_data(app_state.clone())
         .service(hello)
         .service(get_machines)
+        .service(get_machine_containers)
+        .service(get_machine_details_page)
         .service(fs::Files::new("/", "../web/dist").index_file("index.html"))
+
     })
     .bind(("localhost", 6780))?
     .run()
@@ -91,3 +100,41 @@ pub async fn get_machines(state: web::Data<Arc<Mutex<AppState>>>) -> impl Respon
 
     HttpResponse::Ok().json(json!({ "machines": updated_machines }))
 }
+
+#[get("/api/machines/{machine_id}/containers")]
+async fn get_machine_containers(path: web::Path<String>, state: web::Data<Arc<Mutex<AppState>>>) -> impl Responder {
+    let machine_id = path.into_inner();
+    let app_state = state.lock().await;
+    let machines = &app_state.machines;
+    let machine = machines.iter().find(|m| m.name == machine_id);
+    if let Some(machine) = machine {
+        let client = Client::new();
+        let url = format!("http://{}/api/containers", machine.address);
+        match client.get(&url).send().await {
+            Ok(response) => {
+                if let Ok(containers) = response.json::<Vec<Container>>().await {
+                    println!("Containers: {:?}", containers);
+                    HttpResponse::Ok().json(json!({ "containers": containers }))
+                } else {
+                    println!("Failed to parse containers for machine: {}", machine.name);
+                    HttpResponse::InternalServerError().json(json!({ "error": "Failed to parse containers" }))
+                }   
+            }
+            Err(e) => {
+                println!("Failed to fetch containers for machine {}: {}", machine.name, e);
+                HttpResponse::InternalServerError().json(json!({ "error": format!("Failed to fetch containers: {}", e) }))
+            }
+        }
+    } else {
+        HttpResponse::NotFound().json(json!({ "error": format!("Machine {} not found", machine_id) }))
+    }
+}
+
+#[get("/machines/{machine_id}")]
+async fn get_machine_details_page() -> impl Responder {
+    //let machine_id = path.into_inner();
+    // Return the content of "../web/dist/machines/index.html"
+    let file_path = format!("../web/dist/machines/index.html");
+    fs::NamedFile::open(file_path)
+}
+

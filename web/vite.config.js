@@ -12,7 +12,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/routes/', 'index.html'),
-        nested: resolve(__dirname, 'src/routes/nested/index.html'),
+        machines: resolve(__dirname, 'src/routes/machines/index.html'),
       },
     },
   },

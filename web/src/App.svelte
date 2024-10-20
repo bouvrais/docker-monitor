@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-	import Machine from './Machine.svelte';
+	import Machine from './machine.svelte';
 
 	let machines = [];
 
